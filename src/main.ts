@@ -41,7 +41,7 @@ const camera = new Vector(0, 0);
     document.addEventListener("keyup", (e) => {
         delete keys[e.key];
     });
-    let autocam = false;
+    let autocam = true;
     let act = 0;
     let prts = new Array<Point>();
     const defaultCamSpeed = 10;
