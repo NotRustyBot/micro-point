@@ -11,7 +11,6 @@ Math.random = mulberry32(2);
 import { Point } from "./point";
 import { generateDefinitions, typeCount } from "./pointProps";
 import "./style.css";
-import "./Kour.png";
 import { Application, Assets, BlurFilter, Container, Text } from "pixi.js";
 import { Vector } from "./types";
 import { chroma } from "./chroma";
