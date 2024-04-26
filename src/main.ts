@@ -24,7 +24,7 @@ const camera = new Vector(0, 0);
 (async () => {
     const app = new Application();
     await Assets.load("Kour.png");
-    await app.init({ background: "#010509", resizeTo: window, antialias: true, preference: "webgl" });
+    await app.init({ background: "#010509", resizeTo: window, antialias: true });
     app.stage.addChild(pointContainer);
     pointContainer.x = 0;
     pointContainer.y = 0;
