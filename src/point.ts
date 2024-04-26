@@ -1,4 +1,4 @@
-import { Sprite } from "pixi.js";
+import { Assets, Sprite } from "pixi.js";
 import { Vector, Vectorlike } from "./types";
 import { pointDefinition, typeContainerRecord } from "./main";
 import { PointProperty } from "./pointProps";
@@ -28,7 +28,7 @@ export class Point {
         this.type = type;
         this.definition = pointDefinition[type];
         this.move();
-        this.sprite = Sprite.from("Kour.png");
+        this.sprite = Sprite.from(Assets.get("kour"));
         this.sprite.tint = this.definition.color;
         this.sprite.anchor.set(0.5);
         this.sprite.alpha = 0.5;
