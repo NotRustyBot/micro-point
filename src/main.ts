@@ -15,9 +15,6 @@ import { Application, Assets, BlurFilter, Container, Text } from "pixi.js";
 import { Vector } from "./types";
 import { chroma } from "./chroma";
 import { threshold } from "./threshold";
-import Worker from "./worker.ts?worker";
-const worker = new Worker();
-worker.postMessage("");
 
 export const pointContainer = new Container();
 export const typeContainerRecord: Record<number, Container> = {};

@@ -13,6 +13,7 @@ export function generateDefinitions(): Record<number, PointProperty> {
     for (let index = 0; index < typeCount; index++) {
         const map = new Map<number, DistanceStrength>();
         for (let a = 0; a < typeCount; a++) {
+            /*
             let power = 0;
             switch (index) {
                 case a:
@@ -27,6 +28,7 @@ export function generateDefinitions(): Record<number, PointProperty> {
                 default:
                     break;
             }
+            */
             map.set(a, {
                 strength: Math.random() - 0.5,
             });
