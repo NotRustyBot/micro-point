@@ -31,7 +31,7 @@ export class Point {
         this.sprite = Sprite.from(Assets.get("kour"));
         this.sprite.tint = this.definition.color;
         this.sprite.anchor.set(0.5);
-        this.sprite.alpha = 0.5;
+        this.sprite.alpha = 1;
 
         typeContainerRecord[type].addChild(this.sprite);
 
@@ -41,37 +41,40 @@ export class Point {
 
     updateForces() {
         const nears = this.near();
-        if (nears.size > Point.maxNear) {
-            Point.maxNear = nears.size;
+        if (nears.length > Point.maxNear) {
+            Point.maxNear = nears.length;
             Point.mostNear = this;
         }
         for (const near of nears) {
             if (near == this) continue;
-            const dsq = near.position.distance(this.position);
+            const distance = near.position.distance(this.position);
             const nearDiff = this.position.diff(near.position);
 
-            const ds = this.definition.relations.get(near.type);
-            if (dsq < this.maxForceDist) {
-                if (dsq < this.size) {
-                    const diff = nearDiff.result().normalize(3);
-                    this.velocity.add(diff.result());
-                }
+            const relation = this.definition.relations.get(near.type);
+            if (distance < this.maxForceDist) {
+                if (distance < this.maxForceDist / 5) {
+                    const diff = nearDiff.result().normalize((this.maxForceDist / 5 - distance) * 2);
+                    this.velocity.add(diff);
 
-                if (this.type == near.type && dsq < this.size / 10) {
-                    if (this.size <= near.size) {
-                        if (!near.mfr) {
-                            near.eat(this.size);
-                            this.mfr = true;
-                            this.destroy();
-                            break;
-                        }
+                    if (distance < this.size) {
+                        const diff = nearDiff.result().normalize(5);
+                        this.velocity.add(diff);
                     }
-                }
+                } else {
+                    // if (this.type == near.type && distance < this.size / 10) {
+                    //     if (this.size <= near.size) {
+                    //         if (!near.mfr) {
+                    //             near.eat(this.size);
+                    //             this.mfr = true;
+                    //             this.destroy();
+                    //             break;
+                    //         }
+                    //     }
+                    // }
 
-                if (!ds) continue;
-                if (dsq < ds.optima * 2) {
-                    const diff = nearDiff.result().normalize(dsq / ds.optima);
-                    this.velocity.add(diff.result().mult((ds.strength * near.size) / this.size));
+                    if (!relation) continue;
+                    const diff = nearDiff.result().normalize(this.maxForceDist - Math.abs(distance - 0.5 * this.maxForceDist));
+                    this.velocity.add(diff.result().mult(relation.strength * 0.02));
                 }
             }
         }
@@ -84,14 +87,17 @@ export class Point {
     scalyOld = 0;
     scalyAvg = 10;
     updateMove() {
-        let scaley = (this.velocity.length() / this.size + this.scalyOld * this.scalyAvg) / (this.scalyAvg + 1);
+        this.velocity.mult(Math.min(3 / this.velocity.length(), 0.9));
+        const speed = this.velocity.length();
+        let scaley = (speed / this.size + this.scalyOld * this.scalyAvg) / (this.scalyAvg + 1);
+        this.scalyOld = scaley;
         this.sprite.scale.set(scaley + 1, 5 / (scaley + 5));
-        this.sprite.scale.x *= (this.size / 64) * 3 + 0.00001;
-        this.sprite.scale.y *= (this.size / 64) * 3 + 0.00001;
-        this.sprite.rotation = this.velocity.toAngle();
+        this.sprite.scale.x *= (this.size / 64) * 5 + 0.0;
+        this.sprite.scale.y *= (this.size / 64) * 5 + 0.0;
 
-        this.velocity.mult(0.3);
-        this.velocity.add(this.position.result().normalize(-0.1));
+        this.sprite.rotation = rLerp(this.sprite.rotation, this.velocity.toAngle(), 0.25);
+
+        this.velocity.add(this.position.result().normalize(-this.position.lengthSquared() / 10000 ** 2));
         this.move(this.velocity);
 
         this.sprite.x = this.position.x;
@@ -117,16 +123,15 @@ export class Point {
 
     static readonly nearField = [-1, 0, 1];
     near() {
-        const nearSet = new Set<Point>();
+        const nearSet = new Array<Point>();
+        const vl = { x: 0, y: 0 };
         for (const ox of Point.nearField) {
             for (const oy of Point.nearField) {
-                const vl = { x: ox * this.maxForceDist + this.position.x, y: oy * this.maxForceDist + this.position.y };
+                vl.x = ox * this.maxForceDist + this.position.x;
+                vl.y = oy * this.maxForceDist + this.position.y;
                 const chunkChildren = Point.chunk.get(this.positionToGrid(vl));
-
                 if (chunkChildren) {
-                    for (const child of chunkChildren) {
-                        nearSet.add(child);
-                    }
+                    nearSet.push(...chunkChildren);
                 }
             }
         }
@@ -149,4 +154,10 @@ export class Point {
     positionToGrid(vector: Vectorlike): number {
         return this.toGridIndex(this.toGrid(vector));
     }
+}
+
+function rLerp(A: number, B: number, w: number) {
+    let CS = (1 - w) * Math.cos(A) + w * Math.cos(B);
+    let SN = (1 - w) * Math.sin(A) + w * Math.sin(B);
+    return Math.atan2(SN, CS);
 }

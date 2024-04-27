@@ -15,18 +15,22 @@ import { Application, Assets, BlurFilter, Container, Text } from "pixi.js";
 import { Vector } from "./types";
 import { chroma } from "./chroma";
 import { threshold } from "./threshold";
+import Worker from "./worker.ts?worker";
+const worker = new Worker();
+worker.postMessage("");
 
 export const pointContainer = new Container();
 export const typeContainerRecord: Record<number, Container> = {};
 export let pointDefinition = generateDefinitions();
+export let prts = new Array<Point>();
+
 let zoomy = 0;
 const camera = new Vector(0, 0);
 (async () => {
     const app = new Application();
     await app.init({ background: "#010509", resizeTo: window, antialias: true });
-    Assets.add({alias: 'kour', src: 'Kour.png'});
-    await Assets.load( "kour");
-
+    Assets.add({ alias: "kour", src: "Kour.png" });
+    await Assets.load("kour");
 
     app.stage.addChild(pointContainer);
     pointContainer.x = 0;
@@ -46,7 +50,7 @@ const camera = new Vector(0, 0);
     });
     let autocam = true;
     let act = 0;
-    let prts = new Array<Point>();
+
     const defaultCamSpeed = 10;
     let camSpeed = defaultCamSpeed;
     const blur = new BlurFilter({ antialias: true, strength: zoomy });
@@ -62,9 +66,14 @@ const camera = new Vector(0, 0);
 
     app.stage.addChild(autocamText);
 
-    app.ticker.add(() => {
+    app.ticker.add(async () => {
         zoomtext.text = pointContainer.scale.x.toFixed(3) + "x";
         autocamText.text = "\n[" + (autocam ? "AUTO" : "MANUAL") + "]";
+
+        for (const layer in typeContainerRecord) {
+            (typeContainerRecord[layer].filters as BlurFilter[])[0].blur = pointContainer.scale.x * 5;
+        }
+
         if (autocam) {
             act++;
             if (act > 150 && act < 260) {
@@ -168,6 +177,7 @@ const camera = new Vector(0, 0);
         for (const point of prts) {
             point.updateForces();
         }
+
         prts = prts.filter((p) => !p.mfr);
         for (const point of prts) {
             point.updateMove();
@@ -201,6 +211,7 @@ const camera = new Vector(0, 0);
         prts.forEach((p) => p.destroy());
         prts = [];
         pointDefinition = generateDefinitions();
+        const blur = new BlurFilter({ antialias: true, strength: 0 });
         for (const contKey in typeContainerRecord) {
             if (Object.prototype.hasOwnProperty.call(typeContainerRecord, contKey)) {
                 const cont = typeContainerRecord[contKey];
@@ -210,19 +221,17 @@ const camera = new Vector(0, 0);
 
         for (let i = 0; i < typeCount; i++) {
             typeContainerRecord[i] = new Container();
-            typeContainerRecord[i].filters = [threshold];
+            typeContainerRecord[i].filters = [blur, threshold];
             pointContainer.addChild(typeContainerRecord[i]);
         }
         act = 0;
         while (prts.length < 2000) {
-            const rnd = Vector.fromAngle(Math.random() * Math.PI * 2);
-            rnd.mult(Math.random() * 500);
             let point;
-            if (true) {
-                point = new Point(rnd.x, rnd.y, Math.floor(Math.random() * (typeCount - 5)));
-            } else {
-                point = new Point(rnd.x + 1000, rnd.y, Math.floor(Math.random() * (typeCount - 5) + 5));
-            }
+            const rnd = Vector.fromAngle(Math.random() * Math.PI * 2);
+            rnd.mult((Math.random() * 2000 ** 2) ** 0.5);
+
+            point = new Point(rnd.x, rnd.y, Math.floor(Math.random() * (typeCount - 3) + Math.abs((rnd.length() / 2000) * 3)));
+
             point.velocity.x = Math.random() * 10 - 5;
             point.velocity.y = Math.random() * 10 - 5;
             prts.push(point);

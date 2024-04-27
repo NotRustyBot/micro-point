@@ -37,8 +37,9 @@ export class Vector {
     }
 
     distance(vector: Vectorlike): number {
-        let v = new Vector(Math.abs(this.x - vector.x), Math.abs(this.y - vector.y));
-        return v.length();
+        const x = this.x - vector.x;
+        const y = this.y - vector.y;
+        return Math.sqrt(x**2 + y**2);
     }
 
     distanceSquared(vector: Vectorlike): number {

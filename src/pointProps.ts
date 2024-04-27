@@ -4,18 +4,30 @@ export type PointProperty = {
 };
 
 type DistanceStrength = {
-    optima: number;
     strength: number;
 };
 
-export const typeCount = 10;
+export const typeCount = 8;
 export function generateDefinitions(): Record<number, PointProperty> {
     const record: Record<number, PointProperty> = {};
     for (let index = 0; index < typeCount; index++) {
         const map = new Map<number, DistanceStrength>();
         for (let a = 0; a < typeCount; a++) {
+            let power = 0;
+            switch (index) {
+                case a:
+                    power = -0.5;
+                    break;
+
+                case a + 1:
+                    power = -0.25;
+                    break;
+
+
+                default:
+                    break;
+            }
             map.set(a, {
-                optima: 0.5 * Math.random() * 80 + 20,
                 strength: Math.random() - 0.5,
             });
         }

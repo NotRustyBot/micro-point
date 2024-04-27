@@ -14,8 +14,8 @@ uniform sampler2D uTexture;
 void main() {
     finalColor.rgb = normalize(texture(uTexture, vTextureCoord).rgb);
     finalColor.a = texture(uTexture, vTextureCoord).a;
-    if(finalColor.a > 0.1) {
-        finalColor.a = 1. - finalColor.a;
+    if(finalColor.a > 0.2) {
+        finalColor.a = max(1.5 - finalColor.a * 2.5, 0.5);
     } else {
         finalColor.a = 0.;
     }
