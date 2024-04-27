@@ -73,10 +73,10 @@ const camera = new Vector(0, 0);
 
         if (autocam) {
             act++;
-            if (act > 150 && act < 260) {
+            if (act > 150 && act < 240) {
                 zoomIn();
             }
-            if (act > 280 && act < 300) {
+            if (act > 260 && act < 300) {
                 zoomOut();
             }
 
