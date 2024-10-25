@@ -11,7 +11,7 @@ export class Point {
     static mostNear: Point;
     static chunk = new Map<number, Set<Point>>();
     inChunk: number;
-    readonly maxForceDist = 100;
+    readonly maxForceDist = 200;
     size = 5;
     position: Vector;
     velocity = new Vector();
@@ -52,12 +52,12 @@ export class Point {
 
             const relation = this.definition.relations.get(near.type);
             if (distance < this.maxForceDist) {
-                if (distance < this.maxForceDist / 5) {
-                    const diff = nearDiff.result().normalize((this.maxForceDist / 5 - distance) * 2);
+                if (distance < this.maxForceDist / 10) {
+                    const diff = nearDiff.result().normalize((this.maxForceDist / 10 - distance) * 2);
                     this.velocity.add(diff);
 
                     if (distance < this.size) {
-                        const diff = nearDiff.result().normalize(5);
+                        const diff = nearDiff.result().normalize(10);
                         this.velocity.add(diff);
                     }
                 } else {

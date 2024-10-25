@@ -222,7 +222,7 @@ const camera = new Vector(0, 0);
             pointContainer.addChild(typeContainerRecord[i]);
         }
         act = 0;
-        while (prts.length < 2000) {
+        while (prts.length < 1000) {
             let point;
             const rnd = Vector.fromAngle(Math.random() * Math.PI * 2);
             rnd.mult((Math.random() * 2000 ** 2) ** 0.5);
